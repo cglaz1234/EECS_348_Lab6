@@ -1,129 +1,158 @@
 #include <iostream>
 #include <fstream>
-#include <iomanip>
+#include <string>
+using std::fstream;
+using std::string;
+using std::cout;
+const int N = 3;
+//passing by reference
+void read_matrix(fstream& myfile, int (&arr1)[N][N], int (&arr2)[N][N],int &size) {
+    int row = size; int col = size;
 
-const int MAX_SIZE = 10;
-
-void readMatrix(int matrix[MAX_SIZE][MAX_SIZE], int& size, std::ifstream& file) {
-    file >> size;
-    for (int i = 0; i < size; ++i) {
-        for (int j = 0; j < size; ++j) {
-            file >> matrix[i][j];
+    //extract matrix 1
+    for(int i=0;i<row;++i){
+        for(int j=0;j<col;++j){
+            myfile>>arr1[i][j];
         }
     }
-}
-
-void printMatrix(int matrix[MAX_SIZE][MAX_SIZE], int size) {
-    for (int i = 0; i < size; ++i) {
-        for (int j = 0; j < size; ++j) {
-            std::cout << std::setw(4) << matrix[i][j];
-        }
-        std::cout << std::endl;
-    }
-}
-
-void addMatrices(int matrix1[MAX_SIZE][MAX_SIZE], int matrix2[MAX_SIZE][MAX_SIZE], int result[MAX_SIZE][MAX_SIZE], int size) {
-    for (int i = 0; i < size; ++i) {
-        for (int j = 0; j < size; ++j) {
-            result[i][j] = matrix1[i][j] + matrix2[i][j];
+    //extract matrix 2
+    for(int i=0;i<row;++i){
+        for(int j=0;j<col;++j){
+            myfile>>arr2[i][j];
         }
     }
+    myfile.close();
+    return;
 }
-
-void multiplyMatrices(int matrix1[MAX_SIZE][MAX_SIZE], int matrix2[MAX_SIZE][MAX_SIZE], int result[MAX_SIZE][MAX_SIZE], int size) {
-    for (int i = 0; i < size; ++i) {
-        for (int j = 0; j < size; ++j) {
+void print_matrix(int matrix[N][N]){
+    cout << "Matrix1 = \n";
+    for(int i = 0;i<N;i++){
+        for(int j=0;j<N;j++){
+            cout<<matrix[i][j]<<"\t";
+        }
+        cout<<"\n";
+    }
+}
+void add_matrices(int (&arr1)[N][N], int (&arr2)[N][N], int (&res)[N][N],int size){
+    //ensure both matrices are the same size
+    if(!(sizeof(arr1)==sizeof(arr2))){
+        cout << "Error: Matrix dimensions do not match\n";
+        return;
+    }
+    cout << "Matrix1 + Matrix2 =\n\n";
+    //add the matrices together
+    for (int i=0;i<size;i++){
+        for (int j=0;j<size;j++){
+            res[i][j] = arr1[i][j]+arr2[i][j];
+            cout<<res[i][j]<<"\t";
+        }
+        cout << "\n";
+    }
+    return;
+}
+void multiply_matrices(int (&arr1)[N][N], int (&arr2)[N][N], int (&result)[N][N], int size){
+    cout << "Matrix1 * Matrix2 =\n\n";
+    for(int i=0;i<size;i++){
+        for(int j=0;j<size;j++){
             result[i][j] = 0;
-            for (int k = 0; k < size; ++k) {
-                result[i][j] += matrix1[i][k] * matrix2[k][j];
+            for(int k=0;k<size;k++){
+                //store result of row column multiplication
+                result[i][j] += arr1[i][k]*arr2[k][j];
+            }
+            cout << result[i][j] << "\t";
+        }
+        cout << "\n";
+    }
+}
+void subtract_matrices(int (&arr1)[N][N], int (&arr2)[N][N], int (&res)[N][N],int size){
+    //check that size of matrices are the same
+    if(!(sizeof(arr1)==sizeof(arr2))){
+        cout << "Error: Matrix dimensions do not match\n";
+        return;
+    }
+    cout << "Matrix1 - Matrix2 =\n\n";
+    for (int i=0;i<size;i++){
+        for (int j=0;j<size;j++){
+            res[i][j] = arr1[i][j]-arr2[i][j];
+            cout<<res[i][j]<<"\t";
+        }
+        cout << "\n";
+    }
+    return;
+}
+//take in a matrix, row, column, and new value and update the matrix with that value
+void update_matrix(int (&matrix)[N][N], int i, int j, int val, int size){
+    //check that i and j are valid
+    if(!(i<size) | !(j<size)){
+        cout << "Error updating matrix: index not within range\n";
+        return;
+    }
+    cout << "Prior to updating: \n";
+    print_matrix(matrix);
+    cout << "\n";
+    matrix[i][j] = val;
+    //print result
+    cout << "After updating: \n";
+    print_matrix(matrix);
+}
+//search a matrix for its maximum value
+void find_max(int (&matrix)[N][N], int size){
+    int cur_max = 0;
+    for(int i=0;i<size;i++){
+        for(int j=0;j<size;j++){
+            if(matrix[i][j]>cur_max){
+                cur_max = matrix[i][j];
             }
         }
     }
+    cout << "Maximum Value of Matrix 1 = " << cur_max << "\n";
 }
-
-void subtractMatrices(int matrix1[MAX_SIZE][MAX_SIZE], int matrix2[MAX_SIZE][MAX_SIZE], int result[MAX_SIZE][MAX_SIZE], int size) {
-    for (int i = 0; i < size; ++i) {
-        for (int j = 0; j < size; ++j) {
-            result[i][j] = matrix1[i][j] - matrix2[i][j];
+//transpose a given matrix
+void transpose_matrix(int (&matrix)[N][N], int (&res)[N][N], int size){
+    cout << "Transposed Matrix 1 =\n\n";
+    //switch rows and columns
+    for(int i=0;i<size;i++){
+        for(int j=0;j<size;j++){
+            //transposed values get stored in new matrix
+            res[i][j] = matrix[j][i];
+            cout << res[i][j] << "\t";
         }
+        cout << "\n";
     }
 }
-
-void updateElement(int matrix[MAX_SIZE][MAX_SIZE], int size, int row, int col, int newValue) {
-    if (row >= 0 && row < size && col >= 0 && col < size) {
-        matrix[row][col] = newValue;
-    }
-}
-
-int getMaxValue(int matrix[MAX_SIZE][MAX_SIZE], int size) {
-    int maxVal = matrix[0][0];
-    for (int i = 0; i < size; ++i) {
-        for (int j = 0; j < size; ++j) {
-            if (matrix[i][j] > maxVal) {
-                maxVal = matrix[i][j];
-            }
-        }
-    }
-    return maxVal;
-}
-
-void transposeMatrix(int matrix[MAX_SIZE][MAX_SIZE], int size) {
-    int temp;
-    for (int i = 0; i < size; ++i) {
-        for (int j = i + 1; j < size; ++j) {
-            temp = matrix[i][j];
-            matrix[i][j] = matrix[j][i];
-            matrix[j][i] = temp;
-        }
-    }
-}
-
-int main() {
-    std::ifstream inputFile("matrix_input.txt");
-    if (!inputFile) {
-        std::cerr << "Error: Unable to open file." << std::endl;
-        return 1;
-    }
-
+int main(){
     int size;
-    int matrix1[MAX_SIZE][MAX_SIZE];
-    int matrix2[MAX_SIZE][MAX_SIZE];
-    int result[MAX_SIZE][MAX_SIZE];
-
-    readMatrix(matrix1, size, inputFile);
-    readMatrix(matrix2, size, inputFile);
-
-    std::cout << "Matrix 1:" << std::endl;
-    printMatrix(matrix1, size);
-
-    std::cout << "\nMatrix 2:" << std::endl;
-    printMatrix(matrix2, size);
-
-    std::cout << "\nMatrix 1 + Matrix 2:" << std::endl;
-    addMatrices(matrix1, matrix2, result, size);
-    printMatrix(result, size);
-
-    std::cout << "\nMatrix 1 * Matrix 2:" << std::endl;
-    multiplyMatrices(matrix1, matrix2, result, size);
-    printMatrix(result, size);
-
-    std::cout << "\nMatrix 1 - Matrix 2:" << std::endl;
-    subtractMatrices(matrix1, matrix2, result, size);
-    printMatrix(result, size);
-
-    std::cout << "\nEnter row, column, and new value to update Matrix 1: ";
-    int row, col, newValue;
-    std::cin >> row >> col >> newValue;
-    updateElement(matrix1, size, row, col, newValue);
-
-    std::cout << "\nMatrix 1 after update:" << std::endl;
-    printMatrix(matrix1, size);
-
-    std::cout << "\nMax value in Matrix 1: " << getMaxValue(matrix1, size) << std::endl;
-
-    std::cout << "\nTranspose of Matrix 1:" << std::endl;
-    transposeMatrix(matrix1, size);
-    printMatrix(matrix1, size);
-
+    //initialize matrices
+    int mat1[N][N];
+    int mat2[N][N];
+    int result[N][N];
+    //file name gets passed to the first function
+    string filename = "matrix_input.txt";
+    fstream myfile;
+    myfile.open(filename,std::ios::in);
+    if(myfile.is_open()){
+        //extraction w/ right-shift operator to get size
+        myfile >> size;
+    }
+    else{
+        cout<< "Error opening file\n";
+    }
+    read_matrix(myfile,mat1,mat2,size);
+    //call upon various functions
+    cout << "\n";
+    print_matrix(mat1);
+    cout<<"\n";
+    add_matrices(mat1,mat2,result,size);
+    cout<<"\n";
+    multiply_matrices(mat1,mat2,result,size);
+    cout<<"\n";
+    subtract_matrices(mat1,mat2,result,size);
+    cout<<"\n";
+    update_matrix(mat1,0,0,5,size);
+    cout << "\n";
+    find_max(mat1,N);
+    cout << "\n";
+    transpose_matrix(mat1,result,size);
+    cout << "\n";
     return 0;
 }
